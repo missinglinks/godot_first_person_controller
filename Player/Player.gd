@@ -65,6 +65,7 @@ func check_floor():
 	else:
 		is_on_floor = false
 
+
 """
 Handle walk state physics proccess
 """
