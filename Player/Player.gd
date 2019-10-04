@@ -20,6 +20,11 @@ var velocity: Vector3 = Vector3.ZERO
 
 onready var camera: Camera = $Head/Camera
 onready var head: Spatial = $Head
+onready var leg_ray: RayCast = $LegRayCast
+
+# use this variable instead of the is_on_floor() function 
+# to prevent sliding from slopes: 
+var is_on_floor: bool = false
 
 
 func _ready() -> void:
@@ -40,12 +45,25 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	
+	check_floor()
+	
 	match state:
 		States.WALK:
 			walk(delta)
 		States.FLY:
 			fly(delta)
 
+
+"""
+Checks if player is on ground
+"""
+func check_floor():
+	if leg_ray.is_colliding():
+		var obj: Object = leg_ray.get_collider()
+		is_on_floor = true
+	else:
+		is_on_floor = false
 
 """
 Handle walk state physics proccess
@@ -66,12 +84,14 @@ func fly(delta: float) -> void:
 
 
 """
-Calculate new velocity based on player input
+Set new velocity based on player input
 """
 func set_velocity(delta: float, aim: Basis, gravity: float, speed: float, accel: float) -> void:
 	var direction: Vector3 = Vector3.ZERO
+
+	if !is_on_floor:
+		velocity.y += gravity
 	
-	velocity.y += gravity
 	
 	if Input.is_action_pressed("move_forward"):
 		direction -= aim.z
@@ -82,7 +102,10 @@ func set_velocity(delta: float, aim: Basis, gravity: float, speed: float, accel:
 	elif Input.is_action_pressed("strafe_right"):
 		direction += aim.x
 	
-	if Input.is_action_just_pressed("move_jump") and is_on_floor():
+	direction = direction.normalized()
+
+	
+	if Input.is_action_just_pressed("move_jump") and is_on_floor:
 		direction.y += JUMP_FORCE	
 	
 	var target: Vector3 = direction * speed
