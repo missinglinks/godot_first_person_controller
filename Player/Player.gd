@@ -21,11 +21,14 @@ var velocity: Vector3 = Vector3.ZERO
 onready var camera: Camera = $Head/Camera
 onready var head: Spatial = $Head
 onready var leg_ray: RayCast = $LegRayCast
+onready var interaction_ray: RayCast = $Head/Camera/InteractionRayCast
+onready var carry_object_pos: Position3D = $Head/Camera/CarryObjectPosition
 
 # use this variable instead of the is_on_floor() function 
 # to prevent sliding from slopes: 
 var is_on_floor: bool = false
 
+var carry_object: PickUpObject = null
 
 func _ready() -> void:
 	state = States.WALK
@@ -44,10 +47,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			pitch += delta
 
 
-func _physics_process(delta: float) -> void:
-	
+func _process(delta: float) -> void:
 	check_floor()
-	
+	carry_object()
+
+
+func _physics_process(delta: float) -> void:
 	match state:
 		States.WALK:
 			walk(delta)
@@ -55,10 +60,25 @@ func _physics_process(delta: float) -> void:
 			fly(delta)
 
 
+func carry_object() -> void:
+	if not carry_object:
+		if interaction_ray.is_colliding() and Input.is_action_just_pressed("mouse_action"):
+			var obj: Object = interaction_ray.get_collider()
+			if obj is PickUpObject:
+				carry_object = obj
+				carry_object.pick_up(self)
+
+
+	else:
+		if Input.is_action_just_pressed("mouse_action"):
+			carry_object.release()
+			carry_object = null
+
+
 """
 Checks if player is on ground
 """
-func check_floor():
+func check_floor() -> void:
 	if leg_ray.is_colliding():
 		var obj: Object = leg_ray.get_collider()
 		is_on_floor = true
