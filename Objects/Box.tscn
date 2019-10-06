@@ -10,10 +10,10 @@ size = Vector3( 1, 1, 1 )
 subdivide_width = 1
 
 [sub_resource type="SpatialMaterial" id=3]
-albedo_color = Color( 0.32549, 0.294118, 0.294118, 1 )
+albedo_color = Color( 0.780392, 0.415686, 0.415686, 1 )
 
 [node name="Box" type="RigidBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 5 )
+transform = Transform( 1, 0, 0, 0, 0.999848, -0.0174524, 0, 0.0174524, 0.999848, 1, 1, 1 )
 collision_layer = 4
 collision_mask = 5
 continuous_cd = true
@@ -23,5 +23,6 @@ script = ExtResource( 1 )
 shape = SubResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
+layers = 4
 mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
