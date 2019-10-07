@@ -24,6 +24,11 @@ config/name="3D_First_Person_Controller"
 run/main_scene="res://World.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=1280
+window/size/height=720
+
 [input]
 
 move_forward={
@@ -65,4 +70,5 @@ mouse_action={
 
 [rendering]
 
+quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"

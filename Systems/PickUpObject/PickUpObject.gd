@@ -9,10 +9,17 @@ var original_parent: Node
 func _ready():
 	original_parent = get_parent()
 
+
 func pick_up(host: KinematicBody) -> void:
 	original_parent.remove_child(self)
 	host.camera.add_child(self)
-	global_transform = host.carry_object_pos.global_transform	
+	global_transform = host.carry_object_pos.global_transform
+	
+func set_bits() -> void:
+	$MeshInstance.set_layer_mask_bit(3, true);
+	
+func reset_bits() -> void:
+	$MeshInstance.set_layer_mask_bit(3, false);
 	
 func release() -> void:
 	var current_global_transform = global_transform

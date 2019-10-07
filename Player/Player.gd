@@ -37,7 +37,7 @@ func _ready() -> void:
 """
 Set player head/camera rotation based on mouse movement
 """
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var head_rotation: float = - event.relative.x * mouse_sensitivity
 		head.rotate_y(deg2rad(head_rotation))
@@ -61,12 +61,20 @@ func _physics_process(delta: float) -> void:
 
 
 func carry_object() -> void:
+	
+	for obj in get_tree().get_nodes_in_group("PickUpObject"):
+		obj.reset_bits()
+				
 	if not carry_object:
-		if interaction_ray.is_colliding() and Input.is_action_just_pressed("mouse_action"):
+		if interaction_ray.is_colliding():
 			var obj: Object = interaction_ray.get_collider()
-			if obj is PickUpObject:
-				carry_object = obj
-				carry_object.pick_up(self)
+			if obj is PickUpObject:			
+				obj.set_bits()
+					
+				if Input.is_action_just_pressed("mouse_action"):
+		
+					carry_object = obj
+					carry_object.pick_up(self)
 
 
 	else:
