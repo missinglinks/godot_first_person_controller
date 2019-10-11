@@ -1,10 +1,11 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://World.gd" type="Script" id=1]
-[ext_resource path="res://Player/Player.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Objects/Box.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Objects/Box.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Player/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Systems/ObjectOutline/ViewportCamera.gd" type="Script" id=4]
 [ext_resource path="res://Shader/FlatColorShader.shader" type="Shader" id=5]
+[ext_resource path="res://Systems/PickUpObject/PickUpOverlay.gd" type="Script" id=6]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 80, 80 )
@@ -24,7 +25,7 @@ albedo_color = Color( 0.239216, 0.0784314, 0.0784314, 1 )
 [sub_resource type="ConvexPolygonShape" id=6]
 points = PoolVector3Array( 10, 0, 1.5, -10, 0, 1.5, 10, 0, -1.5, -10, 0, -1.5 )
 
-[sub_resource type="Shader" id=8]
+[sub_resource type="Shader" id=7]
 code = "shader_type canvas_item;
 render_mode blend_add;
 
@@ -37,6 +38,7 @@ void fragment() {
 	float radius = 0.002;
 	float divider = 9.2;
 	vec4 col = vec4(0);
+	for (int i = 0; i< 15; i++) {
 	
 	col+= texture(outline, UV+vec2(radius,-0));
 	col+= texture(outline, UV+vec2(-radius,0));
@@ -49,35 +51,33 @@ void fragment() {
 	col+= texture(outline, UV+vec2(0,radius));
 	col+= texture(outline, UV+vec2(-radius,radius));
 	col+= texture(outline, UV+vec2(radius,radius));
+	radius += 0.001;
+	}
 	
-	col/=divider;	
+	col/=divider * 15.0;	
 	
 	COLOR = col-flat_;
 }"
 
-[sub_resource type="ViewportTexture" id=15]
-viewport_path = NodePath("FlatColorViewport")
-
 [sub_resource type="ShaderMaterial" id=9]
 resource_local_to_scene = true
-shader = SubResource( 8 )
-shader_param/outline = SubResource( 15 )
+shader = SubResource( 7 )
 
-[sub_resource type="ShaderMaterial" id=13]
+[sub_resource type="ShaderMaterial" id=10]
 shader = ExtResource( 5 )
-shader_param/col = Color( 0.929412, 1, 0.105882, 1 )
-
-[sub_resource type="ViewportTexture" id=14]
-viewport_path = NodePath("FlatColorViewport")
+shader_param/col = Color( 1, 0, 0, 1 )
 
 [node name="World" type="Spatial"]
 script = ExtResource( 1 )
 
-[node name="Player" parent="." instance=ExtResource( 2 )]
+[node name="Player" parent="." instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.13764, 0 )
 
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 16, 6, 0 )
+light_indirect_energy = 4.56
+
 [node name="Ground" type="MeshInstance" parent="."]
-editor/display_folded = true
 mesh = SubResource( 1 )
 material/0 = SubResource( 2 )
 
@@ -87,12 +87,7 @@ collision_mask = 7
 [node name="CollisionShape" type="CollisionShape" parent="Ground/StaticBody"]
 shape = SubResource( 3 )
 
-[node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 16, 6, 0 )
-light_indirect_energy = 4.56
-
 [node name="Ramp" type="MeshInstance" parent="."]
-editor/display_folded = true
 transform = Transform( 0.939692, -0.34202, 0, 0.34202, 0.939692, 0, 0, 0, 1, 0, 1, -11 )
 mesh = SubResource( 4 )
 material/0 = SubResource( 5 )
@@ -105,19 +100,19 @@ shape = SubResource( 6 )
 
 [node name="Box" parent="." groups=[
 "PickUpObject",
-] instance=ExtResource( 3 )]
+] instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6.91045 )
 collision_mask = 14
 
 [node name="Box2" parent="." groups=[
 "PickUpObject",
-] instance=ExtResource( 3 )]
+] instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.298863, 2.31125, 6.91045 )
 collision_mask = 14
 
 [node name="Box3" parent="." groups=[
 "PickUpObject",
-] instance=ExtResource( 3 )]
+] instance=ExtResource( 2 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0413064, 3.39728, 6.84937 )
 collision_mask = 14
 
@@ -126,44 +121,27 @@ material = SubResource( 9 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0, 0, 0, 1 )
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+viewport = NodePath("FlatColorViewport")
+target = NodePath("../Player")
 
-[node name="FlatColorViewport" type="Viewport" parent="."]
+[node name="FlatColorViewport" type="Viewport" parent="PickUpOverlay"]
 size = Vector2( 1920, 1080 )
 transparent_bg = true
-msaa = 2
+hdr = false
+render_direct_to_screen = true
 render_target_v_flip = true
+render_target_update_mode = 3
 
-[node name="ViewportCamera" type="Camera" parent="FlatColorViewport"]
+[node name="ViewportCamera" type="Camera" parent="PickUpOverlay/FlatColorViewport"]
 cull_mask = 1048568
 current = true
 script = ExtResource( 4 )
 
-[node name="FlatColor" type="ColorRect" parent="FlatColorViewport"]
-material = SubResource( 13 )
+[node name="FlatColor" type="ColorRect" parent="PickUpOverlay/FlatColorViewport"]
+material = SubResource( 10 )
 margin_right = 1920.0
 margin_bottom = 1080.0
-
-[node name="ViewPortPreview" type="Control" parent="."]
-editor/display_folded = true
-margin_left = 8.92343
-margin_top = 13.2814
-margin_right = 8.92343
-margin_bottom = 13.2814
-__meta__ = {
-"_edit_group_": true
-}
-
-[node name="ColorRect" type="ColorRect" parent="ViewPortPreview"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-color = Color( 0, 0, 0, 1 )
-
-[node name="TextureRect" type="TextureRect" parent="ViewPortPreview/ColorRect"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_top = -0.5
-margin_bottom = 0.5
-texture = SubResource( 14 )
-expand = true
