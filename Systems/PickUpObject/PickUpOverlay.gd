@@ -11,9 +11,6 @@ var target_node: Camera
 func _ready():
 	vp = get_node(viewport)
 	viewport_camera.target = get_node(target).camera
-
-"""
-sets viewport texture as shader input texture
-"""
-func _process(delta: float) -> void:
+	
+	#set viewport texture as shader input
 	material.set_shader_param("outline", vp.get_texture())

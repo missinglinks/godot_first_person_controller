@@ -60,23 +60,25 @@ func _physics_process(delta: float) -> void:
 			fly(delta)
 
 
+"""
+Handles picking up and releasing items
+"""
 func carry_object() -> void:
-	
+	#remove all pickup objects from overlay viewport render
 	for obj in get_tree().get_nodes_in_group("PickUpObject"):
-		obj.reset_bits()
-				
+		obj.reset_layer_bits()
+		
 	if not carry_object:
 		if interaction_ray.is_colliding():
 			var obj: Object = interaction_ray.get_collider()
-			if obj is PickUpObject:			
-				obj.set_bits()
-					
+			if obj is PickUpObject:	
+			
+				#add object to overlay viewport render
+				obj.set_layer_bits()
+				
 				if Input.is_action_just_pressed("mouse_action"):
-		
 					carry_object = obj
 					carry_object.pick_up(self)
-
-
 	else:
 		if Input.is_action_just_pressed("mouse_action"):
 			carry_object.release()
@@ -121,7 +123,6 @@ func set_velocity(delta: float, aim: Basis, gravity: float, speed: float, accel:
 	if !is_on_floor:
 		velocity.y += gravity
 	
-	
 	if Input.is_action_pressed("move_forward"):
 		direction -= aim.z
 	elif Input.is_action_pressed("move_backward"):
@@ -132,7 +133,6 @@ func set_velocity(delta: float, aim: Basis, gravity: float, speed: float, accel:
 		direction += aim.x
 	
 	direction = direction.normalized()
-
 	
 	if Input.is_action_just_pressed("move_jump") and is_on_floor:
 		direction.y += JUMP_FORCE	

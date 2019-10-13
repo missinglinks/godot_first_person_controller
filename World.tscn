@@ -1,11 +1,12 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://World.gd" type="Script" id=1]
 [ext_resource path="res://Objects/Box.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Player/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Systems/ObjectOutline/ViewportCamera.gd" type="Script" id=4]
-[ext_resource path="res://Shader/FlatColorShader.shader" type="Shader" id=5]
+[ext_resource path="res://Shader/OutlineBlurShader.tres" type="Material" id=5]
 [ext_resource path="res://Systems/PickUpObject/PickUpOverlay.gd" type="Script" id=6]
+[ext_resource path="res://Shader/FlatColorShader.tres" type="Material" id=7]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 80, 80 )
@@ -25,48 +26,6 @@ albedo_color = Color( 0.239216, 0.0784314, 0.0784314, 1 )
 [sub_resource type="ConvexPolygonShape" id=6]
 points = PoolVector3Array( 10, 0, 1.5, -10, 0, 1.5, 10, 0, -1.5, -10, 0, -1.5 )
 
-[sub_resource type="Shader" id=7]
-code = "shader_type canvas_item;
-render_mode blend_add;
-
-uniform sampler2D outline: hint_albedo;
-
-
-void fragment() {
-	vec4 flat_ = texture(outline, UV);
-	
-	float radius = 0.002;
-	float divider = 9.2;
-	vec4 col = vec4(0);
-	for (int i = 0; i< 15; i++) {
-	
-	col+= texture(outline, UV+vec2(radius,-0));
-	col+= texture(outline, UV+vec2(-radius,0));
-	col+= texture(outline, UV+vec2(0,0));
-	
-	col+= texture(outline, UV+vec2(-radius,-radius));
-	col+= texture(outline, UV+vec2(radius,-radius));
-	col+= texture(outline, UV+vec2(0,-radius));
-	
-	col+= texture(outline, UV+vec2(0,radius));
-	col+= texture(outline, UV+vec2(-radius,radius));
-	col+= texture(outline, UV+vec2(radius,radius));
-	radius += 0.001;
-	}
-	
-	col/=divider * 15.0;	
-	
-	COLOR = col-flat_;
-}"
-
-[sub_resource type="ShaderMaterial" id=9]
-resource_local_to_scene = true
-shader = SubResource( 7 )
-
-[sub_resource type="ShaderMaterial" id=10]
-shader = ExtResource( 5 )
-shader_param/col = Color( 1, 0, 0, 1 )
-
 [node name="World" type="Spatial"]
 script = ExtResource( 1 )
 
@@ -76,6 +35,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.13764, 0 )
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 16, 6, 0 )
 light_indirect_energy = 4.56
+shadow_bias = 0.04
+shadow_contact = 0.1
 
 [node name="Ground" type="MeshInstance" parent="."]
 mesh = SubResource( 1 )
@@ -117,7 +78,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0413064, 3.39728, 6.84937 )
 collision_mask = 14
 
 [node name="PickUpOverlay" type="ColorRect" parent="."]
-material = SubResource( 9 )
+material = ExtResource( 5 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0, 0, 0, 1 )
@@ -142,6 +103,6 @@ current = true
 script = ExtResource( 4 )
 
 [node name="FlatColor" type="ColorRect" parent="PickUpOverlay/FlatColorViewport"]
-material = SubResource( 10 )
+material = ExtResource( 7 )
 margin_right = 1920.0
 margin_bottom = 1080.0
